@@ -2,7 +2,7 @@ package main
 
 import (
 	"./sqlDriver"
-	"fmt"
+	//"fmt"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	port = "3306"
 	_type = "tcp"
 	database = "test"
-	pass = "test"
+	pass = "root"
 	d := sqlDrvier.Driver{}.SetDriver(port, host, user, pass, database, _type)
-	fmt.Println(d.Connection())
+	d.Select()
 }

@@ -2,6 +2,7 @@ package sqlDrvier
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -14,6 +15,13 @@ type Driver struct {
 	Type     string
 }
 
+var db *sql.DB
+
+type Test struct {
+	id   int
+	test string
+}
+
 // 初始化
 func (d Driver) SetDriver(port string, host string, user string, pass string, database string, _type string) (dri *Driver) {
 	return &Driver{Port: port, Host: host, User: user, Pass: pass, Database: database, Type: _type}
@@ -23,37 +31,35 @@ func (d Driver) GetDriver() (dri Driver) {
 	return d
 }
 
-func (d Driver) Connection() (err error) {
+func (d Driver) connection() (err error) {
 	dsn := d.User + ":" + d.Pass + "@" + d.Type + "(" + d.Host + ":" + d.Port + ")/" + d.Database
-	db, err := sql.Open("mysql", dsn)
-	db.Ping()
+	db, err = sql.Open("mysql", dsn)
 	return err
 }
 
-//初始化连接
-//func (connection *sqlDriver) Connection() (err error) {
-//
-//	dsn := connection.user + ":" + connection.pass + "@" + connection._type + "(" + connection.host + ":" + connection.port+ ")/" + connection.database
-//	db, err := sql.Open("mysql", dsn)
-//	if err != nil {
-//		return err
-//	}
-//	err = db.Ping()
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
-//
-//func main() {
-//
-//}
-//// 测试连接
-//func TestConnection() {
-//	sqlDriver := &sqlDriver{"3306", "127.0.0.1", "root", "test", "test", "tcp"}
-//	err := connection(sqlDriver)
-//	if err != nil {
-//		fmt.Print("connetion db failed, err: %v\n", err)
-//		return
-//	}
-//}
+func (d Driver) Select() (err error, row sql.Row) {
+	err = d.connection()
+	if err != nil {
+		return
+	}
+	rows, err := db.Query("select * from test")
+
+	defer db.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		var t Test
+		err1 := rows.Scan(&t.id, &t.test)
+		if err1 != nil {
+			return
+		}
+		fmt.Println(t)
+	}
+	//for rows.Next() {
+	//	row, err := rows.Columns()
+	//	fmt.Println(row, err)
+	//}
+	return err, row
+}
